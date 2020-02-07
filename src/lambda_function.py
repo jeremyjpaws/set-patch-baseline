@@ -64,7 +64,7 @@ def lambda_handler(event, context):
         except:
             logger.error(f'Unknown failure in setting default patch baseline!')
             signal_failure()
-    else if requestType == "Delete":
+    elif requestType == "Delete":
         #  No good definition for "undoing" a default set
         #  TODO One option here would be to add code to set default back to the AWS Default
         logger.info('Got Delete request, doing nothing except signalling back success.')
