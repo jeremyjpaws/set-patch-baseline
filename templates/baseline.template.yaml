@@ -57,16 +57,17 @@ Resources:
           - Effect: Allow
             Action:
             - ssm:*
+            - logs:*
             Resource: "*"
 
 
   SetBaselineFunction:
     Type: AWS::Lambda::Function
     Properties:
-      RunTime: python3.7
+      Runtime: python3.7
       Description: Give an SSM Patch baseline, set it to the default
       Role: !GetAtt LambdaExecutionRole.Arn
-      Handler: lambda_function.lambda_handler
+      Handler: index.handler
       Code:
         ZipFile: |
           # Given a Patch Baseline, set it to default
@@ -92,23 +93,23 @@ Resources:
 
               logger.info(f'SSM response is {response}')
 
-          def signal_success():
+          def signal_success(event, context):
               logger.info('Sending success response back to CloudFormation')
               responseData = {}
               responseData['Comment'] = 'example custom respone data where we could return custom attributes'
               cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData)
 
-          def signal_failure():
+          def signal_failure(event, context):
               logger.info('Sending FAILURE response back to CloudFormation')
               responseData = {}
               responseData['Comment'] = 'example custom respone data where we could return custom attributes'
               cfnresponse.send(event, context, cfnresponse.FAILURE, responseData)
 
-          def lambda_handler(event, context):
+          def handler(event, context):
               logger.info('Beginning function...')
               logger.info(f'Got event: {event}')
               
-              requestType = event['requestType']
+              requestType = event['RequestType']
               baselineId = event['ResourceProperties']['baselineId']
               logger.info(f'Request Type is: {requestType}')
               logger.info(f'Baseline ID is: {baselineId}')
@@ -118,10 +119,10 @@ Resources:
                   logger.info(f'Got a {requestType} request, setting default baseline...')
                   try:
                       set_baseline(baselineId)
-                      signal_success()
+                      signal_success(event, context)
                   except:
                       logger.error(f'Unknown failure in setting default patch baseline!')
-                      signal_failure()
+                      signal_failure(event, context)
               elif requestType == "Delete":
                   #  No good definition for "undoing" a default set
                   #  TODO One option here would be to add code to set default back to the AWS Default
