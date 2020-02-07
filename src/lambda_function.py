@@ -8,7 +8,7 @@ import os
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-def set_baseline(mybaseline)
+def set_baseline(mybaseline):
 
     ssm = boto3.client('ssm')
 
