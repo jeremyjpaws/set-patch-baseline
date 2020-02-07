@@ -1,0 +1,30 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  Creating OperatingSystem PatchBaseline for all AWS instances.
+Resources:
+  MyPatchBaseline:
+    Type: 'AWS::SSM::PatchBaseline'
+    Properties:
+      Name: MyWindowsBaseline001
+      Description: Baseline containing all updates approved for Windows instances
+      OperatingSystem: WINDOWS
+      ApprovalRules:
+        PatchRules:
+          - PatchFilterGroup:
+              PatchFilters:
+                - Values:
+                    - Critical
+                    - Important
+                  Key: MSRC_SEVERITY
+                - Values:
+                    - SecurityUpdates
+                    - CriticalUpdates
+                  Key: CLASSIFICATION
+                - Values:
+                    - WindowsServer2019
+                    - WindowsServer2016
+                    - WindowsServer2012
+                    - WindowsServer2012R2
+                  Key: PRODUCT
+            ApproveAfterDays: 0
+            ComplianceLevel: CRITICAL
